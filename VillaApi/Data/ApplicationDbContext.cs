@@ -7,11 +7,21 @@ namespace VillaApi.Data
     public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     {
         public DbSet<Villa> Villas { get; set; }
+        public DbSet<IdempotencyRecord> IdempotencyRecords {  get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
+            modelBuilder.Entity<IdempotencyRecord>(e =>
+            {
+                e.HasIndex(x => new { x.Key, x.Endpoint }).IsUnique();  // DB-level guard against races
+                e.Property(x => x.Key).HasMaxLength(100);
+                e.Property(x => x.Endpoint).HasMaxLength(200);
+                e.Property(x => x.RequestHash).HasMaxLength(64);
+            });
 
             modelBuilder.Entity<Villa>().HasData(
                     new Villa
@@ -76,8 +86,6 @@ namespace VillaApi.Data
                     }
 
             );
-
-           
         }
 
         

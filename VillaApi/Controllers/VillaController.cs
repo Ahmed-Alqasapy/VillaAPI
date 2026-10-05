@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VillaApi.Data;
+using VillaApi.Filters;
 using VillaApi.Models;
 using VillaApi.Models.DTOs;
 
@@ -64,11 +65,19 @@ namespace VillaApi.Controllers
 
 
         [HttpPost()]
+        [ServiceFilter(typeof(IdempotencyFilter))]
         public async Task<ActionResult<Villa>> CraeteVilla(VillaCreateDTO  VillaDto)
         {
             try
             {
                 if (VillaDto == null) { return BadRequest(); }
+
+                var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v => v.Name == VillaDto.Name);
+
+                if (dublicateVilla != null)
+                {
+                    return Conflict($"A villa with '{VillaDto.Name}' already exists");
+                }
 
                 Villa villa = _map.Map<Villa>(VillaDto);
 
@@ -88,6 +97,7 @@ namespace VillaApi.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [ServiceFilter(typeof(IdempotencyFilter))]
         public async Task<ActionResult> UpdateVilla(int id, VillaUpdateDTO villaDto)
         {
             if(id<=0) { return BadRequest(); }
@@ -95,6 +105,13 @@ namespace VillaApi.Controllers
             if(id!=villaDto.Id) { return BadRequest(); }
 
             if (villaDto == null) return BadRequest();
+
+            var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v=>v.Name == villaDto.Name &&  v.Id != id);
+
+            if(dublicateVilla != null)
+            {
+                return Conflict($"A villa with '{villaDto.Name}' already exists");
+            }
 
             var dbVilla = await _db.Villas.FirstOrDefaultAsync(v=>v.Id==id);
 
