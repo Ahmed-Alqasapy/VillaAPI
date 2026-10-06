@@ -36,9 +36,9 @@ namespace VillaApi
                 //        }
                 //}); 
                 #endregion
+
             });
 
-            //builder.Services.AddControllers();
             //Configuration For Serlizations.
             builder.Services.AddControllers().AddJsonOptions(o =>
             {
@@ -57,8 +57,11 @@ namespace VillaApi
             {
                 o.CreateMap<Villa,VillaCreateDTO>().ReverseMap();
                 o.CreateMap<Villa,VillaUpdateDTO>().ReverseMap();
+                o.CreateMap<Villa, VillaDTo>().ReverseMap();
+                o.CreateMap<VillaUpdateDTO, VillaDTo>().ReverseMap();
             });
-            //ROUTING
+
+            //ROUTING VERSIONING
             builder.Services.AddApiVersioning(o=>
             {
                 o.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);

@@ -19,12 +19,12 @@ namespace VillaApi.Controllers
         public VillaController(ApplicationDbContext db , IMapper map)
         {
                 _db = db;
-            _map = map;
+                _map = map;
         }
 
         [HttpGet]
         [Route("/Villas")]
-        public async Task <ActionResult< IEnumerable<Villa>>> Get_Villas()
+        public async Task <ActionResult<ApiResponse<IEnumerable<VillaDTo>>>> Get_Villas()
         {
             //return "This is a GET request for Villas";
             var villas = await _db.Villas.ToListAsync();
@@ -33,32 +33,46 @@ namespace VillaApi.Controllers
                 return  NotFound();
             }
 
-            return Ok(villas);
+            var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
+            var response = ApiResponse<IEnumerable<VillaDTo>>.Ok(responseVillaDto, "Villas retrieved successfully");
+
+            return Ok(response);
         }
 
 
         [HttpGet("{id:int}")]
-        public async Task <ActionResult<Villa>> GetVillaById(int id)
+        public async Task <ActionResult<ApiResponse<VillaDTo>>> GetVillaById(int id)
         {
             try
             {
-                //return $"this is the villa id you want:  {id}";
-                if (id <= 0) { return BadRequest(); }
+                if (id <= 0) {
+  
+                    return BadRequest(  ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero"));
+                }
 
                 var villa = await _db.Villas.FirstOrDefaultAsync(v => v.Id == id);
+
                 if (villa == null)
                 {
-                    return NotFound();
+
+
+                    return NotFound(ApiResponse<object>.NotFound("Villas not found"));
                 }
                 else
                 {
-                    return Ok(villa);
+
+                    var responseVillaDto = _map.Map<VillaDTo>(villa);
+                    var response = ApiResponse<VillaDTo>.Ok(responseVillaDto,"Villa Retrieved Sucessfully");
+
+                    return Ok(response);
                 }
 
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occured while retreving villa with Id:{id}");
+
+                var errorResponse = ApiResponse<object>.Error(500, $"An error occured while retreving villa with Id:{id}", ex.Message);
+                return StatusCode(500, errorResponse);
             }
             
         }
@@ -66,17 +80,22 @@ namespace VillaApi.Controllers
 
         [HttpPost()]
         [ServiceFilter(typeof(IdempotencyFilter))]
-        public async Task<ActionResult<Villa>> CraeteVilla(VillaCreateDTO  VillaDto)
+        public async Task<ActionResult<ApiResponse< VillaDTo>>> CraeteVilla(VillaCreateDTO  VillaDto)
         {
             try
             {
-                if (VillaDto == null) { return BadRequest(); }
+                if (VillaDto == null)
+                {
+                    return BadRequest( ApiResponse<object>.BadRequest("Bad Request", "There is somthing with the data "));
+                }
 
                 var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v => v.Name == VillaDto.Name);
 
                 if (dublicateVilla != null)
                 {
-                    return Conflict($"A villa with '{VillaDto.Name}' already exists");
+                    //return Conflict($"A villa with '{VillaDto.Name}' already exists");
+
+                    return Conflict(ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{VillaDto.Name}' already exists"));
                 }
 
                 Villa villa = _map.Map<Villa>(VillaDto);
@@ -84,38 +103,56 @@ namespace VillaApi.Controllers
                 await _db.Villas.AddAsync(villa);
                 await _db.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetVillaById), new {  villa.Id },villa);
+                var responseVillaDto = _map.Map<VillaDTo>(villa);
+                var resposne = ApiResponse<VillaDTo>.CreatedAt(responseVillaDto, "Villa created sucessfully ");
+
+                return CreatedAtAction( nameof(GetVillaById),new { villa.Id} ,resposne);
+
+                //return CreatedAtAction(nameof(GetVillaById), new { villa.Id }, _map.Map<VillaDTo>(villa));
                 
                 
 
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occured while Creating villa");
+
+                var errorResponse = ApiResponse<object>.Error(500, "An error occured while created  a villa", ex.Message);
+                return StatusCode(500,errorResponse);
             }
 
         }
 
         [HttpPut("{id:int}")]
         [ServiceFilter(typeof(IdempotencyFilter))]
-        public async Task<ActionResult> UpdateVilla(int id, VillaUpdateDTO villaDto)
+        public async Task<ActionResult<ApiResponse<VillaDTo>>> UpdateVilla(int id, VillaUpdateDTO villaDto)
         {
-            if(id<=0) { return BadRequest(); }
+            if(id<=0)
+            {
+                return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero "));
+            }
 
-            if(id!=villaDto.Id) { return BadRequest(); }
+            if (id!=villaDto.Id)
+            {
+                return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "id dosen`t match "));
+            }
 
-            if (villaDto == null) return BadRequest();
+            if (villaDto == null) return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "there is no data in the body to be updated"));
+            
 
             var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v=>v.Name == villaDto.Name &&  v.Id != id);
 
             if(dublicateVilla != null)
             {
-                return Conflict($"A villa with '{villaDto.Name}' already exists");
+                return Conflict(ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{villaDto.Name}' already exists"));
+
+
+
             }
 
             var dbVilla = await _db.Villas.FirstOrDefaultAsync(v=>v.Id==id);
 
-            if(dbVilla == null) return NotFound();
+            if(dbVilla == null) return NotFound(ApiResponse<object>.NotFound("villa not found"));
+
 
             _map.Map(villaDto, dbVilla);
 
@@ -123,7 +160,10 @@ namespace VillaApi.Controllers
 
             await _db.SaveChangesAsync();
 
-            return NoContent();
+            var villaResponseDto = _map.Map<VillaDTo>(villaDto);
+
+            var response = ApiResponse<VillaDTo>.Ok(villaResponseDto,"Villa Updated Successfuly");
+            return Ok(response);
 
         }
 
@@ -131,19 +171,26 @@ namespace VillaApi.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteVilla(int id)
         {
-            if (id <= 0) { return BadRequest(); }
+            if (id <= 0)
+            {
+                return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero "));
+            }
 
 
 
             var dbVilla = await _db.Villas.FirstOrDefaultAsync(v => v.Id == id);
 
-            if (dbVilla == null) return NotFound();
+            if (dbVilla == null) return NotFound(ApiResponse<object>.NotFound("Villa not found"));
 
-             _db.Villas.Remove(dbVilla);
+
+            _db.Villas.Remove(dbVilla);
 
             await _db.SaveChangesAsync();
 
-            return NoContent();
+            var response = ApiResponse<object>.NoContent();
+
+
+            return Ok(response);
 
         }
 

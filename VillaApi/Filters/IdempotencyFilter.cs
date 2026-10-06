@@ -80,9 +80,14 @@ namespace VillaApi.Filters
                 executed.Result is ObjectResult obj &&
                 (obj.StatusCode ?? 200) is >= 200 and < 300)
             {
+                var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                };
                 record.StatusCode = obj.StatusCode ?? 200;
+
                 record.ResponseBody = JsonSerializer.Serialize(obj.Value,
-                    new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                  options);
             }
             else
             {

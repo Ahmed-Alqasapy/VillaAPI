@@ -19,7 +19,7 @@ namespace VillaApi.Controllers
             if (!allowed.Contains(ext)) return BadRequest("File type not allowed");
             if (file.Length == 0) return BadRequest("Empty file");
 
-            var safeName = $"{Guid.NewGuid()}{ext}";                 
+            var safeName = $"{Guid.NewGuid()}{ext}";
             await using var stream = System.IO.File.Create(Path.Combine(_storagePath, safeName));
             await file.CopyToAsync(stream, ct);
             return Ok();
