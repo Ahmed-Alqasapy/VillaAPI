@@ -36,9 +36,9 @@ namespace VillaApi.Controllers
 
             var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
             var response = ApiResponse<IEnumerable<VillaDTo>>.Ok(responseVillaDto, "Villas retrieved successfully");
-            string mysession = "My name is ahmed";
+            //string mysession = "My name is ahmed";
 
-            HttpContext.Session.SetString("MySession", mysession);
+            //HttpContext.Session.SetString("MySession", mysession);
 
             return Ok(response);
         }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Policy;
 
 namespace VillaApi.Models.DTOs
 {
@@ -16,7 +17,6 @@ namespace VillaApi.Models.DTOs
         public int Occupancy { get; set; }
 
         public string? ImageUrl { get; set; }
-
    
 
     }
