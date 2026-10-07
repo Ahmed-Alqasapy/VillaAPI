@@ -22,6 +22,8 @@ namespace VillaApi
 
             builder.Services.AddDistributedMemoryCache();
 
+            //Add Sesstion To make the HTTP Requests StateFull or to make the Server Stateful
+            //Rule for cookie naming , the cookie name must not have any spaces.        
             builder.Services.AddSession(options =>
             {
                 options.Cookie.Name = ".NetCookie";
@@ -33,6 +35,7 @@ namespace VillaApi
             });
 
             //apply Anti Forgery Token
+            //Header name is what is sent as a key with each request so the server find if this request came from another forgery page "Not from the our domain"
             builder.Services.AddAntiforgery(o =>
             {
                 o.Cookie.Name = ".MyApp.Session";
@@ -65,6 +68,7 @@ namespace VillaApi
             });
 
             //Configuration For Serlizations.
+            //Here we apply filters with each controller we have except the GET Endpoints.
             builder.Services.AddControllers(f =>
             {
                 f.Filters.AddService<ValidateAntiforgeryApiFilter>(); // validate only POST,PUT,DELETE,PATCH
@@ -83,6 +87,8 @@ namespace VillaApi
             builder.Services.AddScoped<ValidateAntiforgeryApiFilter>();
 
             builder.Services.AddOpenApi();
+
+            //Make here automapping for the DTOs we made with the DB Entites.
             builder.Services.AddAutoMapper(o =>
             {
                 o.CreateMap<Villa,VillaCreateDTO>().ReverseMap();
@@ -92,6 +98,7 @@ namespace VillaApi
             });
 
             //ROUTING VERSIONING
+            //Here if we made versioning we will catch this later.
             builder.Services.AddApiVersioning(o=>
             {
                 o.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
@@ -101,17 +108,18 @@ namespace VillaApi
             }).AddMvc();
 
             //FOR MAKING URL LOWER CASE ROUTING
+            //Configure the Routeoptions to be lower cases.
             builder.Services.Configure<RouteOptions>(o => o.LowercaseUrls = true);
 
             var app = builder.Build();
-
+            //Seed data dynimacally if there are pending migration and it is applied to "update-database"
             await SeedDataAsync(app);
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-
+                //Configure the scalar api instead of swagger.
                 app.MapScalarApiReference();
             }
 
@@ -132,7 +140,7 @@ namespace VillaApi
             using var scope = app.Services.CreateScope();
 
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
+            //This is what i meant by if there are any pending migration that are made 
             await context.Database.MigrateAsync();
 
        }
