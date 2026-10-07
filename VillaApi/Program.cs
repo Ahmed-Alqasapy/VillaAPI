@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Text.Encodings.Web;
@@ -18,6 +19,30 @@ namespace VillaApi
         {
             //DI
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDistributedMemoryCache();
+
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.Name = ".NetCookie";
+                options.Cookie.IsEssential = true;
+                options.IdleTimeout = TimeSpan.FromMinutes(1);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always; //for HTTPS
+                options.Cookie.SameSite = SameSiteMode.Strict;
+            });
+
+            //apply Anti Forgery Token
+            builder.Services.AddAntiforgery(o =>
+            {
+                o.Cookie.Name = ".MyApp.Session";
+                o.Cookie.HttpOnly = true;
+                o.Cookie.IsEssential = true;
+                o.HeaderName = "X-XSRF-TOKEN";
+                o.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                o.Cookie.SameSite = SameSiteMode.Strict;
+            });
+
 
             // Add services to the container.
             builder.Services.AddDbContext<ApplicationDbContext>(option =>
@@ -40,8 +65,12 @@ namespace VillaApi
             });
 
             //Configuration For Serlizations.
-            builder.Services.AddControllers().AddJsonOptions(o =>
+            builder.Services.AddControllers(f =>
             {
+                f.Filters.AddService<ValidateAntiforgeryApiFilter>(); // validate only POST,PUT,DELETE,PATCH
+            }).AddJsonOptions(o =>
+            {
+                
                 var j = o.JsonSerializerOptions;
                 j.Converters.Add(new JsonStringEnumConverter());                               // Case File #6
                 j.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;               // smaller responses (optional)
@@ -51,14 +80,15 @@ namespace VillaApi
 
 
             builder.Services.AddScoped<IdempotencyFilter>();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            builder.Services.AddScoped<ValidateAntiforgeryApiFilter>();
+
             builder.Services.AddOpenApi();
             builder.Services.AddAutoMapper(o =>
             {
                 o.CreateMap<Villa,VillaCreateDTO>().ReverseMap();
                 o.CreateMap<Villa,VillaUpdateDTO>().ReverseMap();
                 o.CreateMap<Villa, VillaDTo>().ReverseMap();
-                o.CreateMap<VillaUpdateDTO, VillaDTo>().ReverseMap();
+                o.CreateMap<VillaUpdateDTO,VillaDTo>().ReverseMap();
             });
 
             //ROUTING VERSIONING
@@ -88,6 +118,8 @@ namespace VillaApi
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            app.UseSession();
 
 
             app.MapControllers();

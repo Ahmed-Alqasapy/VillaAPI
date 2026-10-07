@@ -26,6 +26,7 @@ namespace VillaApi.Controllers
         [Route("/Villas")]
         public async Task <ActionResult<ApiResponse<IEnumerable<VillaDTo>>>> Get_Villas()
         {
+      
             //return "This is a GET request for Villas";
             var villas = await _db.Villas.ToListAsync();
             if(villas.Count == 0)
@@ -35,6 +36,9 @@ namespace VillaApi.Controllers
 
             var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
             var response = ApiResponse<IEnumerable<VillaDTo>>.Ok(responseVillaDto, "Villas retrieved successfully");
+            string mysession = "My name is ahmed";
+
+            HttpContext.Session.SetString("MySession", mysession);
 
             return Ok(response);
         }
