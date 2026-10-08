@@ -37,7 +37,7 @@
 
         public static ApiResponse<TData> NoContent(string message="Operation Done Sucessfully") => Create(true, 204,message);
         public static ApiResponse<TData> CreatedAt(TData data,string message) => Create(true, 201,message,data);
-        public static ApiResponse<TData> Ok(TData data,string message) => Create(true, 200,message,data);
+        public static ApiResponse<TData> Ok(TData data,string message , object?errors) => Create(true, 200,message,data ,errors:errors );
         public static ApiResponse<TData> Conflict(string message , object?errors) => Create(false, 409,message,errors:errors);
         public static ApiResponse<TData> Error(int statusCode,string message , object?errors) => Create(false, statusCode,message,errors:errors);
 

@@ -24,27 +24,28 @@ namespace VillaApi.Controllers
 
         [HttpGet]
         [Route("/Villas")]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTo>>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task <ActionResult<ApiResponse<IEnumerable<VillaDTo>>>> Get_Villas()
         {
       
-            //return "This is a GET request for Villas";
             var villas = await _db.Villas.ToListAsync();
             if(villas.Count == 0)
-            {
-                return  NotFound();
-            }
+                return NotFound(ApiResponse<object>.NotFound("Villas not found"));
+
 
             var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
-            var response = ApiResponse<IEnumerable<VillaDTo>>.Ok(responseVillaDto, "Villas retrieved successfully");
-            //string mysession = "My name is ahmed";
-
-            //HttpContext.Session.SetString("MySession", mysession);
-
+            var response = ApiResponse<IEnumerable<VillaDTo>>.Ok(responseVillaDto, "Villas retrieved successfully",null);
+        
             return Ok(response);
         }
 
 
         [HttpGet("{id:int}")]
+        [ProducesResponseType(typeof(ApiResponse<VillaDTo>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task <ActionResult<ApiResponse<VillaDTo>>> GetVillaById(int id)
         {
             try
@@ -60,13 +61,13 @@ namespace VillaApi.Controllers
                 {
 
 
-                    return NotFound(ApiResponse<object>.NotFound("Villas not found"));
+                    return NotFound(ApiResponse<object>.NotFound("villa not found"));
                 }
                 else
                 {
 
                     var responseVillaDto = _map.Map<VillaDTo>(villa);
-                    var response = ApiResponse<VillaDTo>.Ok(responseVillaDto,"Villa Retrieved Sucessfully");
+                    var response = ApiResponse<VillaDTo>.Ok(responseVillaDto,"Villa Retrieved Sucessfully",null);
 
                     return Ok(response);
                 }
@@ -84,6 +85,10 @@ namespace VillaApi.Controllers
 
         [HttpPost()]
         [ServiceFilter(typeof(IdempotencyFilter))]
+        [ProducesResponseType(typeof(ApiResponse<VillaDTo>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VillaDTo>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse< VillaDTo>>> CraeteVilla(VillaCreateDTO  VillaDto)
         {
             try
@@ -97,7 +102,6 @@ namespace VillaApi.Controllers
 
                 if (dublicateVilla != null)
                 {
-                    //return Conflict($"A villa with '{VillaDto.Name}' already exists");
 
                     return Conflict(ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{VillaDto.Name}' already exists"));
                 }
@@ -112,7 +116,6 @@ namespace VillaApi.Controllers
 
                 return CreatedAtAction( nameof(GetVillaById),new { villa.Id} ,resposne);
 
-                //return CreatedAtAction(nameof(GetVillaById), new { villa.Id }, _map.Map<VillaDTo>(villa));
                 
                 
 
@@ -128,6 +131,10 @@ namespace VillaApi.Controllers
 
         [HttpPut("{id:int}")]
         [ServiceFilter(typeof(IdempotencyFilter))]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VillaDTo>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<VillaDTo>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse<VillaDTo>>> UpdateVilla(int id, VillaUpdateDTO villaDto)
         {
             if(id<=0)
@@ -166,13 +173,16 @@ namespace VillaApi.Controllers
 
             var villaResponseDto = _map.Map<VillaDTo>(villaDto);
 
-            var response = ApiResponse<VillaDTo>.Ok(villaResponseDto,"Villa Updated Successfuly");
+            var response = ApiResponse<VillaDTo>.Ok(villaResponseDto,"Villa Updated Successfuly",null);
             return Ok(response);
 
         }
 
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<VillaDTo>), StatusCodes.Status200OK)]
         public async Task<ActionResult> DeleteVilla(int id)
         {
             if (id <= 0)
