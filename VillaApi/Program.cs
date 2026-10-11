@@ -10,6 +10,7 @@ using VillaApi.Data;
 using VillaApi.Filters;
 using VillaApi.Models;
 using VillaApi.Models.DTOs;
+using VillaApi.Services;
 
 namespace VillaApi
 {
@@ -83,9 +84,7 @@ namespace VillaApi
             });
 
 
-            builder.Services.AddScoped<IdempotencyFilter>();
-            builder.Services.AddScoped<ValidateAntiforgeryApiFilter>();
-
+        
             builder.Services.AddOpenApi();
 
             //Make here automapping for the DTOs we made with the DB Entites.
@@ -95,7 +94,15 @@ namespace VillaApi
                 o.CreateMap<Villa,VillaUpdateDTO>().ReverseMap();
                 o.CreateMap<Villa, VillaDTo>().ReverseMap();
                 o.CreateMap<VillaUpdateDTO,VillaDTo>().ReverseMap();
+                o.CreateMap<User,UserDTO>().ReverseMap();   
             });
+
+
+            //DI
+            builder.Services.AddScoped<IdempotencyFilter>();
+            builder.Services.AddScoped<ValidateAntiforgeryApiFilter>();
+            builder.Services.AddScoped<IAuthService,AuthService>();
+
 
             //ROUTING VERSIONING
             //Here if we made versioning we will catch this later.
