@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VillaApi.Data;
+using VillaApi.Filters;
 using VillaApi.Models;
 using VillaApi.Models.DTOs;
 using VillaApi.Services;
@@ -18,13 +19,14 @@ namespace VillaApi.Controllers
          _auth = auth; 
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("/Register")]
+        [ServiceFilter(typeof(IdempotencyFilter))]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTo>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<UserDTO>>> Register(RegistrationRequestDTO registrationRequestDTO)
         {
-            if(_auth.IsEmailExsistsAsync(registrationRequestDTO.Email).Result)
+            if( await _auth.IsEmailExsistsAsync(registrationRequestDTO.Email))
             {
                 return Conflict(ApiResponse<object>.Conflict("Email already exists", "Please use a different email"));
             }

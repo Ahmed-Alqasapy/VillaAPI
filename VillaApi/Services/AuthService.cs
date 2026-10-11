@@ -20,12 +20,37 @@ namespace VillaApi.Services
         }
         public async Task<bool> IsEmailExsistsAsync(string email)
         {
-            return await _db.Users.AnyAsync(u=>u.Email.Equals(email,StringComparison.CurrentCultureIgnoreCase));
+            return await _db.Users.AnyAsync(u=>u.Email.ToLower()==email.ToLower());
         }
 
-        public Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO)
+        public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            try
+            {
+                var user = await _db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == loginRequestDTO.Email.ToLower());
+
+                if (user == null || user.Password != loginRequestDTO.Password)
+                {
+
+
+                    return null;
+                }
+
+                //Generate JWT Token here and return it along with user details
+
+                return new LoginResponseDTO
+                {
+                    Token = "",
+                    UserDto = _map.Map<UserDTO>(user)
+                };
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidOperationException("there is an error while registering the user", ex);
+            }
+
+
         }
 
         public async Task<UserDTO?> RegisterAsync(RegistrationRequestDTO registrationRequestDTO)

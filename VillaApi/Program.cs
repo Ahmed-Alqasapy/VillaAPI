@@ -102,6 +102,7 @@ namespace VillaApi
             builder.Services.AddScoped<IdempotencyFilter>();
             builder.Services.AddScoped<ValidateAntiforgeryApiFilter>();
             builder.Services.AddScoped<IAuthService,AuthService>();
+            builder.Services.AddScoped<IConfigurationManager,ConfigurationManager>();
 
 
             //ROUTING VERSIONING
