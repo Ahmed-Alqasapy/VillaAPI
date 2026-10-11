@@ -7,6 +7,7 @@ namespace VillaApi.Data
     public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     {
         public DbSet<Villa> Villas { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<IdempotencyRecord> IdempotencyRecords {  get; set; }
 
 
