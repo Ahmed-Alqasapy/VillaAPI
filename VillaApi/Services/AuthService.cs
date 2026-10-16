@@ -1,8 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using System.Drawing.Imaging;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using VillaApi.Data;
 using VillaApi.Models;
 using VillaApi.Models.DTOs;
+using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
 namespace VillaApi.Services
 {
@@ -11,11 +18,13 @@ namespace VillaApi.Services
 
         ApplicationDbContext _db;
         IMapper _map;
+        IConfiguration _config;
 
-        public AuthService(IMapper map , IConfigurationManager configurationManager , ApplicationDbContext db)
+        public AuthService(IMapper map , IConfiguration configuration , ApplicationDbContext db)
         {
                 _map = map;
-            _db = db;
+            _config = configuration;
+                _db = db;
 
         }
         public async Task<bool> IsEmailExsistsAsync(string email)
@@ -87,5 +96,36 @@ namespace VillaApi.Services
 
 
         }
+
+
+
+         public string GenerateJwtToken(User user)
+        {
+            var key =Encoding.ASCII.GetBytes( _config.GetSection("JwtSettings")["Secret_Key"]);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Name),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
+                }),
+                Expires= DateTime.UtcNow.AddMinutes(20),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha256Signature)
+                
+            };
+
+            var tokenHandler = new JsonWebTokenHandler();
+
+            //var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            //var jwt = tokenHandler.vre(token);
+            var jwt = tokenHandler.CreateToken(tokenDescriptor);
+
+            return jwt;
+        }
+
     }
 }
