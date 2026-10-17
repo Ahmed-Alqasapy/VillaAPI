@@ -9,6 +9,7 @@ using System.Text.Unicode;
 using System.Threading.Tasks;
 using VillaApi.Data;
 using VillaApi.Filters;
+using VillaApi.Middleware;
 using VillaApi.Models;
 using VillaApi.Models.DTOs;
 using VillaApi.Services;
@@ -23,6 +24,8 @@ namespace VillaApi
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            //builder.Services.AddProblemDetails();
 
             //Add Sesstion To make the HTTP Requests StateFull or to make the Server Stateful
             //Rule for cookie naming , the cookie name must not have any spaces.        
@@ -136,6 +139,7 @@ namespace VillaApi
             builder.Services.Configure<RouteOptions>(o => o.LowercaseUrls = true);
 
             var app = builder.Build();
+            app.UseExceptionHandler();
             //Seed data dynimacally if there are pending migration and it is applied to "update-database"
             await SeedDataAsync(app);
 
