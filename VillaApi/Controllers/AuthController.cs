@@ -45,7 +45,7 @@ namespace VillaApi.Controllers
                 return StatusCode(500, errorResponse);
             }
 
-            var response = ApiResponse<UserDTO>.CreatedAt(user, "User Registred Sucessfully");
+            var response = ApiResponse<UserDTO>.Created(user, "User Registred Sucessfully");
 
             return CreatedAtAction(nameof(Register),response);
         }

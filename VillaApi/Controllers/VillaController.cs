@@ -52,7 +52,7 @@ namespace VillaApi.Controllers
             {
                 if (id <= 0) {
   
-                    return BadRequest(  ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero"));
+                    return ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero").ToActionResult();
                 }
 
                 var villa = await _db.Villas.FirstOrDefaultAsync(v => v.Id == id);
@@ -61,7 +61,8 @@ namespace VillaApi.Controllers
                 {
 
 
-                    return NotFound(ApiResponse<object>.NotFound("villa not found"));
+                    //return NotFound(ApiResponse<object>.NotFound("villa not found"));
+                    return ApiResponse<VillaDTo>.NotFound($"Villa With id = {id} Not Found").ToActionResult();
                 }
                 else
                 {
@@ -76,8 +77,8 @@ namespace VillaApi.Controllers
             catch (Exception ex)
             {
 
-                var errorResponse = ApiResponse<object>.Error(500, $"An error occured while retreving villa with Id:{id}", ex.Message);
-                return StatusCode(500, errorResponse);
+                var errorResponse = ApiResponse<object>.Error(500, $"An error occured while retreving villa with Id:{id}", ex.Message).ToActionResult();
+                return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
             }
             
         }
@@ -95,7 +96,7 @@ namespace VillaApi.Controllers
             {
                 if (VillaDto == null)
                 {
-                    return BadRequest( ApiResponse<object>.BadRequest("Bad Request", "There is somthing with the data "));
+                    return ApiResponse<object>.BadRequest("Bad Request", "There is somthing with the data ").ToActionResult();
                 }
 
                 var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v => v.Name == VillaDto.Name);
@@ -103,7 +104,7 @@ namespace VillaApi.Controllers
                 if (dublicateVilla != null)
                 {
 
-                    return Conflict(ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{VillaDto.Name}' already exists"));
+                    return ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{VillaDto.Name}' already exists").ToActionResult();
                 }
 
                 Villa villa = _map.Map<Villa>(VillaDto);
@@ -112,7 +113,7 @@ namespace VillaApi.Controllers
                 await _db.SaveChangesAsync();
 
                 var responseVillaDto = _map.Map<VillaDTo>(villa);
-                var resposne = ApiResponse<VillaDTo>.CreatedAt(responseVillaDto, "Villa created sucessfully ");
+                var resposne = ApiResponse<VillaDTo>.Created(responseVillaDto, "Villa created sucessfully ").ToActionResult();
 
                 return CreatedAtAction(nameof(GetVillaById),new { villa.Id} ,resposne);
 
@@ -123,7 +124,7 @@ namespace VillaApi.Controllers
             catch (Exception ex)
             {
 
-                var errorResponse = ApiResponse<object>.Error(500, "An error occured while created  a villa", ex.Message);
+                var errorResponse = ApiResponse<object>.Error(500, "An error occured while created  a villa", ex.Message).ToActionResult();
                 return StatusCode(500,errorResponse);
             }
 
@@ -139,22 +140,22 @@ namespace VillaApi.Controllers
         {
             if(id<=0)
             {
-                return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero "));
+                return ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero ").ToActionResult();
             }
 
             if (id!=villaDto.Id)
             {
-                return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "id dosen`t match "));
+                return ApiResponse<object>.BadRequest("Bad Request", "id dosen`t match ").ToActionResult();
             }
 
-            if (villaDto == null) return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "there is no data in the body to be updated"));
+            if (villaDto == null) return ApiResponse<object>.BadRequest("Bad Request", "there is no data in the body to be updated").ToActionResult();
             
 
             var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v=>v.Name == villaDto.Name &&  v.Id != id);
 
             if(dublicateVilla != null)
             {
-                return Conflict(ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{villaDto.Name}' already exists"));
+                return ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{villaDto.Name}' already exists").ToActionResult();
 
 
 
@@ -162,7 +163,7 @@ namespace VillaApi.Controllers
 
             var dbVilla = await _db.Villas.FirstOrDefaultAsync(v=>v.Id==id);
 
-            if(dbVilla == null) return NotFound(ApiResponse<object>.NotFound("villa not found"));
+            if(dbVilla == null) return ApiResponse<object>.NotFound("villa not found").ToActionResult();
 
 
             _map.Map(villaDto, dbVilla);
@@ -173,7 +174,7 @@ namespace VillaApi.Controllers
 
             var villaResponseDto = _map.Map<VillaDTo>(villaDto);
 
-            var response = ApiResponse<VillaDTo>.Ok(villaResponseDto,"Villa Updated Successfuly",null);
+            var response = ApiResponse<VillaDTo>.Ok(villaResponseDto, "Villa Updated Successfuly", null).ToActionResult();
             return Ok(response);
 
         }
@@ -187,14 +188,14 @@ namespace VillaApi.Controllers
         {
             if (id <= 0)
             {
-                return BadRequest(ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero "));
+                return ApiResponse<object>.BadRequest("Bad Request", "Id must be greater than zero ").ToActionResult();
             }
 
 
 
             var dbVilla = await _db.Villas.FirstOrDefaultAsync(v => v.Id == id);
 
-            if (dbVilla == null) return NotFound(ApiResponse<object>.NotFound("Villa not found"));
+            if (dbVilla == null) return ApiResponse<object>.NotFound("Villa not found").ToActionResult();
 
 
             _db.Villas.Remove(dbVilla);
