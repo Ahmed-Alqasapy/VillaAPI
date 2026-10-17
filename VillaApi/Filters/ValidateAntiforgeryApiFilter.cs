@@ -31,10 +31,16 @@ namespace VillaApi.Filters
             catch (AntiforgeryValidationException ex)
             {
                 logger.LogWarning(ex, "Antiforgery validation failed for {Path}", context.HttpContext.Request.Path);
-                context.Result = new BadRequestObjectResult(new ProblemDetails
+                context.Result = new BadRequestObjectResult(new ApiResponse<object>
                 {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Invalid or missing anti-forgery token."
+                    //Status = StatusCodes.Status400BadRequest,
+                    //Title = "Invalid or missing anti-forgery token."
+                    StatusCode=StatusCodes.Status400BadRequest,
+                    Success=false,
+                    Data = null,
+                    Errors=ex.Message,
+                    Message =" Invalid or missing anti - forgery token."
+
                 });
             }
         }

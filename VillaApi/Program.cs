@@ -25,7 +25,7 @@ namespace VillaApi
 
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-            //builder.Services.AddProblemDetails();
+            builder.Services.AddProblemDetails();
 
             //Add Sesstion To make the HTTP Requests StateFull or to make the Server Stateful
             //Rule for cookie naming , the cookie name must not have any spaces.        
