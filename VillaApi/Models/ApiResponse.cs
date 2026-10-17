@@ -38,7 +38,6 @@
         public static ApiResponse<TData> Unauthorized ( object? errors, string message = "Please Log in") => Create(false,StatusCodes.Status401Unauthorized,message,errors:errors);
         public static ApiResponse<TData> Forbidden ( object? errors, string message = "you dont have permission to do that") => Create(false,StatusCodes.Status403Forbidden,message,errors:errors);
 
-
         //No Content Will be Removed but Why ?????.................
         public static ApiResponse<TData> NoContent(string message="Operation Done Sucessfully") => Create(true, StatusCodes.Status204NoContent,message);
         public static ApiResponse<TData> Created(TData data,string message) => Create(true, StatusCodes.Status201Created,message,data);
