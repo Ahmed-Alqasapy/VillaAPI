@@ -30,14 +30,17 @@ namespace VillaApi.Controllers
         {
       
             var villas = await _db.Villas.ToListAsync();
-            if(villas.Count == 0)
-                return NotFound(ApiResponse<object>.NotFound("Villas not found"));
+            //if(villas.Count == 0)
+                //return ApiResponse<object>.Ok(new IEnumerable<VillaDTo>(),).ToActionResult();
 
 
-            var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
-            var response = ApiResponse<IEnumerable<VillaDTo>>.Ok(responseVillaDto, "Villas retrieved successfully",null);
-        
-            return Ok(response);
+                var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
+                //var response = ApiResponse<IEnumerable<VillaDTo>>.Ok(responseVillaDto, "Villas retrieved successfully",null).ToActionResult();
+                return ApiResponse<IEnumerable<VillaDTo>>
+              .Ok(responseVillaDto, villas.Count == 0 ? "No villas found." : "Villas retrieved successfully.",null)
+              .ToActionResult();
+
+            //return response;
         }
 
 
@@ -68,9 +71,9 @@ namespace VillaApi.Controllers
                 {
 
                     var responseVillaDto = _map.Map<VillaDTo>(villa);
-                    var response = ApiResponse<VillaDTo>.Ok(responseVillaDto,"Villa Retrieved Sucessfully",null);
+                    var response = ApiResponse<VillaDTo>.Ok(responseVillaDto,"Villa Retrieved Sucessfully",null).ToActionResult();
 
-                    return Ok(response);
+                    return response;
                 }
 
             }
@@ -202,10 +205,11 @@ namespace VillaApi.Controllers
 
             await _db.SaveChangesAsync();
 
-            var response = ApiResponse<object>.NoContent();
+            //var response = ApiResponse<object>.NoContent();
 
 
-            return Ok(response);
+            //return Ok(response);
+            return ApiResponse<object>.Ok(null!, "Villa Deleted Sucessfully",null).ToActionResult();
 
         }
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using System.Threading.Tasks;
@@ -73,7 +74,22 @@ namespace VillaApi
             builder.Services.AddControllers(f =>
             {
                 f.Filters.AddService<ValidateAntiforgeryApiFilter>(); // validate only POST,PUT,DELETE,PATCH
-            }).AddJsonOptions(o =>
+            }).ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState.Where(kv => kv.Value!.Errors.Count > 0)
+                    .ToDictionary(kv=>JsonNamingPolicy.CamelCase.ConvertName(kv.Key),
+                    
+                    kv=>kv.Value!.Errors.Select(e => string.IsNullOrEmpty(e.ErrorMessage) ? "Invalid value." : e.ErrorMessage)
+                            .ToArray());
+
+                    var response = ApiResponse<object>.BadRequest("Validation failed", errors);
+
+                    return new BadRequestObjectResult(response);
+                };
+            })
+             .AddJsonOptions(o =>
             {
                 
                 var j = o.JsonSerializerOptions;
