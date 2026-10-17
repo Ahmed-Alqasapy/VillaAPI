@@ -6,6 +6,7 @@ using VillaApi.Data;
 using VillaApi.Filters;
 using VillaApi.Models;
 using VillaApi.Models.DTOs;
+using VillaApi.Helper;
 
 namespace VillaApi.Controllers
 {
@@ -122,6 +123,11 @@ namespace VillaApi.Controllers
 
                 
                 
+
+            }
+            catch(DbUpdateException ex) when (DbExceptionHelper.IsUniqueViolation(ex))
+            {
+                return ApiResponse<VillaDTo>.Conflict("This villa was just created by someone else.",null);
 
             }
             catch (Exception ex)
