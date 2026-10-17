@@ -22,7 +22,8 @@ namespace VillaApi.Controllers
         [HttpPost]
         [Route("/Register")]
         [ServiceFilter(typeof(IdempotencyFilter))]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTo>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<UserDTO>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<UserDTO>>> Register(RegistrationRequestDTO registrationRequestDTO)
         {
@@ -48,5 +49,42 @@ namespace VillaApi.Controllers
 
             return CreatedAtAction(nameof(Register),response);
         }
+
+
+
+
+
+        [HttpPost]
+        [Route("/Login")]
+        [ServiceFilter(typeof(IdempotencyFilter))]
+        [ProducesResponseType(typeof(ApiResponse<LoginResponseDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>),StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+
+        public async Task<ActionResult<ApiResponse<LoginResponseDTO>>> Login(LoginRequestDTO LoginRequestDTO)
+        {
+            //if (await _auth.IsEmailExsistsAsync(LoginRequestDTO.Email))
+            //{
+            //    return Conflict(ApiResponse<object>.Conflict("Email already exists", "Please use a different email"));
+            //}
+
+            if (LoginRequestDTO == null)
+            {
+                return BadRequest(ApiResponse<object>.BadRequest("Invalid request", "Registration request cannot be null"));
+            }
+
+            var user = await _auth.LoginAsync(LoginRequestDTO);
+
+            if (user == null)
+            {
+                var errorResponse = ApiResponse<UserDTO>.Error(500, "User Login failed", "An error occurred while Login");
+                return StatusCode(500, errorResponse);
+            }
+
+            var response = ApiResponse<LoginResponseDTO>.Ok(user, "User Login Sucessfully",null);
+
+            return Ok(response);
+        }
+
     }
 }

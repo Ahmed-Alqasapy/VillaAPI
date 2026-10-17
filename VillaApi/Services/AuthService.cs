@@ -48,9 +48,11 @@ namespace VillaApi.Services
 
                 //Generate JWT Token here and return it along with user details
 
+                var token = GenerateJwtToken(user);
+
                 return new LoginResponseDTO
                 {
-                    Token = "",
+                    Token = token,
                     UserDto = _map.Map<UserDTO>(user)
                 };
             }
