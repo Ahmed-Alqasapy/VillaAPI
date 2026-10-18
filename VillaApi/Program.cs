@@ -1,7 +1,12 @@
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -23,9 +28,45 @@ namespace VillaApi
             //DI
             var builder = WebApplication.CreateBuilder(args);
 
+            var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtSettings")["Secret_Key"]);
+
+
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
+
+
+
+            //Configue the Authentication Middleware
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters() { 
+                
+                IssuerSigningKey= new SymmetricSecurityKey(key),
+                ValidateAudience=false,
+                ValidateIssuerSigningKey=true,
+                ValidateIssuer=false,
+                ValidateLifetime=true,
+                ClockSkew=TimeSpan.Zero
+
+
+                
+                
+                
+                };
+
+            }
+
+
+
+
+            );    
+                ;
+
+
 
             //Add Sesstion To make the HTTP Requests StateFull or to make the Server Stateful
             //Rule for cookie naming , the cookie name must not have any spaces.        
@@ -103,8 +144,31 @@ namespace VillaApi
             });
 
 
-        
-            builder.Services.AddOpenApi();
+            //Add Authentication To Scalar
+            builder.Services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    document.Components ??= new OpenApiComponents();
+                    document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+                    {
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",                
+                        BearerFormat = "JWT",
+                        Description = "Enter your JWT token (without the word 'Bearer')"
+                    };
+
+                    document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                    {
+                        [new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        }] = Array.Empty<string>()
+                    });
+
+                    return Task.CompletedTask;   
+                });
+            });
 
             //Make here automapping for the DTOs we made with the DB Entites.
             builder.Services.AddAutoMapper(o =>
@@ -153,6 +217,7 @@ namespace VillaApi
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseSession();
