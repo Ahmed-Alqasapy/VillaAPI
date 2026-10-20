@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RoyalVilla.DTO;
 using Scalar.AspNetCore;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,8 +16,9 @@ using System.Threading.Tasks;
 using VillaApi.Data;
 using VillaApi.Filters;
 using VillaApi.Middleware;
+using VillaApi.Migrations;
 using VillaApi.Models;
-using VillaApi.Models.DTOs;
+using VillaApi.Models.DTOs.AuthDTOs;
 using VillaApi.Services;
 
 namespace VillaApi
@@ -144,7 +146,7 @@ namespace VillaApi
             });
 
 
-            //Add Authentication To Scalar
+            //Add Authentication add bearer JWT in Scalar
             builder.Services.AddOpenApi(options =>
             {
                 options.AddDocumentTransformer((document, context, cancellationToken) =>
@@ -177,7 +179,23 @@ namespace VillaApi
                 o.CreateMap<Villa,VillaUpdateDTO>().ReverseMap();
                 o.CreateMap<Villa, VillaDTo>().ReverseMap();
                 o.CreateMap<VillaUpdateDTO,VillaDTo>().ReverseMap();
-                o.CreateMap<User,UserDTO>().ReverseMap();   
+                o.CreateMap<User,UserDTO>().ReverseMap();
+                o.CreateMap<VillaAmenityCreateDTo, VillaAmenities>()
+                       .ForMember(d => d.CreatedDate, o => o.Ignore());
+                o.CreateMap<VillaAmenities, VillaAmenityCreateDTo>();
+
+                o.CreateMap<VillaAmenities, VillaAmenityUpdateDTo>();
+                
+                o.CreateMap<VillaAmenityUpdateDTo, VillaAmenities>()
+                        .ForMember(d => d.UpdatedDate, o => o.Ignore());
+                o.CreateMap<AmenityDTo, VillaAmenities>();
+
+                //There is a property in the Amentity Dto that will cause a problem whihle map from the DB class to the DTO one 
+                o.CreateMap<VillaAmenities, AmenityDTo>()
+                .ForMember(dest => dest.VillaName, opt => opt.MapFrom(src=>src.Villa! != null? src.Villa.Name : null));
+
+                
+
             });
 
 
@@ -185,6 +203,7 @@ namespace VillaApi
             builder.Services.AddScoped<IdempotencyFilter>();
             builder.Services.AddScoped<ValidateAntiforgeryApiFilter>();
             builder.Services.AddScoped<IAuthService,AuthService>();
+            builder.Services.AddScoped<IVillaService, VillaService>();
             builder.Services.AddScoped<IConfigurationManager,ConfigurationManager>();
 
 

@@ -10,6 +10,8 @@ namespace VillaApi.Data
         public DbSet<User> Users { get; set; }
         public DbSet<IdempotencyRecord> IdempotencyRecords {  get; set; }
 
+        public DbSet<VillaAmenities> VillaAmenities { get; set; }   
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

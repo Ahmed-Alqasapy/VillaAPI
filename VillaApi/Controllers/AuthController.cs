@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using VillaApi.Data;
 using VillaApi.Filters;
 using VillaApi.Models;
-using VillaApi.Models.DTOs;
+using VillaApi.Models.DTOs.AuthDTOs;
 using VillaApi.Services;
 
 namespace VillaApi.Controllers
@@ -27,7 +27,10 @@ namespace VillaApi.Controllers
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<UserDTO>>> Register(RegistrationRequestDTO registrationRequestDTO)
         {
-            if( await _auth.IsEmailExsistsAsync(registrationRequestDTO.Email))
+            //SEE HERE THE PART OF TRANSFORMATION , WE GOT THE DATA FROM THE CLIENT AND TRANSFORM IT TO OUT RegistrationRequestDTO STRUCTURE BEFORE VALIDATE IT
+            //ON BUSINESS SERVICE
+
+            if ( await _auth.IsEmailExsistsAsync(registrationRequestDTO.Email))
             {
                 return ApiResponse<object>.Conflict("Email already exists", "Please use a different email").ToActionResult();
              }
@@ -63,11 +66,7 @@ namespace VillaApi.Controllers
 
         public async Task<ActionResult<ApiResponse<LoginResponseDTO>>> Login(LoginRequestDTO LoginRequestDTO)
         {
-            //if (await _auth.IsEmailExsistsAsync(LoginRequestDTO.Email))
-            //{
-            //    return Conflict(ApiResponse<object>.Conflict("Email already exists", "Please use a different email"));
-            //}
-
+           
             if (LoginRequestDTO == null)
             {
                 return ApiResponse<object>.BadRequest("Invalid request", "Registration request cannot be null").ToActionResult();

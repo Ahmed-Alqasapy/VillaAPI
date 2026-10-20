@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using VillaApi.Data;
 using VillaApi.Models;
-using VillaApi.Models.DTOs;
+using VillaApi.Models.DTOs.AuthDTOs;
 using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
 namespace VillaApi.Services
@@ -27,6 +27,8 @@ namespace VillaApi.Services
                 _db = db;
 
         }
+
+        //VALIDATION BUISNESS LAYER.
         public async Task<bool> IsEmailExsistsAsync(string email)
         {
             return await _db.Users.AnyAsync(u=>u.Email.ToLower()==email.ToLower());

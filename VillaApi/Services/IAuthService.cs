@@ -1,4 +1,4 @@
-﻿using VillaApi.Models.DTOs;
+﻿using VillaApi.Models.DTOs.AuthDTOs;
 
 namespace VillaApi.Services
 {
@@ -8,6 +8,7 @@ namespace VillaApi.Services
 
        Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO);
 
+        //VALIDATION ON BUINESS LAYER LEVEL 
        Task<bool> IsEmailExsistsAsync(string email);
 
 

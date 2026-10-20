@@ -26,5 +26,6 @@ namespace VillaApi.Models
 
         }
 
+        public ICollection<VillaAmenities> VillaAmenities { get; set; } = new List<VillaAmenities>();
     }
 }
