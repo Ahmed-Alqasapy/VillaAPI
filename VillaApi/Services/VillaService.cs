@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RoyalVilla.DTO;
 using VillaApi.Data;
 using VillaApi.Models;
+using VillaApi.Reposatories;
 
 namespace VillaApi.Services
 {
@@ -10,16 +11,18 @@ namespace VillaApi.Services
     {
         public readonly ApplicationDbContext _db;
         public readonly IMapper _map;
-        public VillaService(ApplicationDbContext db, IMapper map)
+        public readonly VillaRepo _villaRepo;
+        public VillaService(ApplicationDbContext db, IMapper map , VillaRepo villaRepo)
         {
             _db = db;
             _map = map;
+            _villaRepo = villaRepo;
             
         }
 
         public async Task<IEnumerable<VillaDTo>> GetAllVillas()
         {
-            var villas = await _db.Villas.ToListAsync();
+            var villas = await _villaRepo.FindVillas();
 
             var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
 
@@ -29,14 +32,14 @@ namespace VillaApi.Services
 
         public async Task<bool> GetVillaByName(string name)
         {
-            var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v => v.Name == name);
+            var dublicateVilla =await _villaRepo.FindVillaByName(name);
 
             return dublicateVilla == null;
         }
 
         public async Task<Villa> GetVillaById(int id)
         {
-            var villa = await _db.Villas.FirstOrDefaultAsync(v => v.Id == id);
+            var villa = await _villaRepo.FindVillaById(id);
 
             if (villa == null)
             {
@@ -49,12 +52,10 @@ namespace VillaApi.Services
 
         public async Task<Villa> SaveVilla(VillaCreateDTO villaCreateDTO)
         {
-            //Mapping
+
             Villa villa = _map.Map<Villa>(villaCreateDTO);
 
-
-            await _db.Villas.AddAsync(villa);
-            await _db.SaveChangesAsync();
+            await _villaRepo.SavingVilla(villa);
 
             return villa;
 
@@ -63,21 +64,21 @@ namespace VillaApi.Services
 
         public async Task DeleteVilla(Villa villa)
         {
-             _db.Villas.Remove(villa);
-            await _db.SaveChangesAsync();
+           
 
+            await _villaRepo.DeletingVilla(villa);
             
         }
 
         public async Task UpdateVilla(Villa villa)
         {
             villa.UpdatedDate = DateTime.Now;
-            await _db.SaveChangesAsync();
+            await _villaRepo.UpdatingVilla();
         }
 
         public async Task<bool> GetVillaByNameAndId(string name, int id)
         {
-            var dublicateVilla = await _db.Villas.FirstOrDefaultAsync(v => v.Name == name && v.Id != id);
+            var dublicateVilla = await _villaRepo.GetVillaByNameAndId(name,id);
 
             return dublicateVilla == null;
 

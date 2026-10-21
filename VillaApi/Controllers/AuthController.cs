@@ -16,7 +16,7 @@ namespace VillaApi.Controllers
        readonly IAuthService _auth;
         public AuthController(IAuthService auth)
         {
-         _auth = auth; 
+              _auth = auth; 
         }
 
         [HttpPost]
@@ -29,7 +29,6 @@ namespace VillaApi.Controllers
         {
             //SEE HERE THE PART OF TRANSFORMATION , WE GOT THE DATA FROM THE CLIENT AND TRANSFORM IT TO OUT RegistrationRequestDTO STRUCTURE BEFORE VALIDATE IT
             //ON BUSINESS SERVICE
-
             if ( await _auth.IsEmailExsistsAsync(registrationRequestDTO.Email))
             {
                 return ApiResponse<object>.Conflict("Email already exists", "Please use a different email").ToActionResult();
@@ -80,7 +79,7 @@ namespace VillaApi.Controllers
                 return StatusCode(500, errorResponse);
             }
 
-            var response = ApiResponse<LoginResponseDTO>.Ok(user, "User Login Sucessfully", null).ToActionResult();
+            var response = ApiResponse<LoginResponseDTO>.Ok(user,"User Login Sucessfully", null).ToActionResult();
 
             return Ok(response);
         }

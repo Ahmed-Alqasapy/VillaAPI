@@ -19,6 +19,7 @@ using VillaApi.Middleware;
 using VillaApi.Migrations;
 using VillaApi.Models;
 using VillaApi.Models.DTOs.AuthDTOs;
+using VillaApi.Reposatories;
 using VillaApi.Services;
 
 namespace VillaApi
@@ -30,7 +31,7 @@ namespace VillaApi
             //DI
             var builder = WebApplication.CreateBuilder(args);
 
-            var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtSettings")["Secret_Key"]);
+            var key = Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JwtSettings")["Secret_Key"]);
 
 
             builder.Services.AddDistributedMemoryCache();
@@ -139,6 +140,7 @@ namespace VillaApi
             {
                 
                 var j = o.JsonSerializerOptions;
+                j.PropertyNameCaseInsensitive = true;
                 j.Converters.Add(new JsonStringEnumConverter());                               // Case File #6
                 j.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;               // smaller responses (optional)
                 j.ReferenceHandler = ReferenceHandler.IgnoreCycles;                           // safety net for #5
@@ -204,6 +206,7 @@ namespace VillaApi
             builder.Services.AddScoped<ValidateAntiforgeryApiFilter>();
             builder.Services.AddScoped<IAuthService,AuthService>();
             builder.Services.AddScoped<IVillaService, VillaService>();
+            builder.Services.AddScoped<VillaRepo>();
             builder.Services.AddScoped<IConfigurationManager,ConfigurationManager>();
 
 
@@ -235,12 +238,12 @@ namespace VillaApi
             }
 
             app.UseHttpsRedirection();
+            app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseSession();
-
 
             app.MapControllers();
 

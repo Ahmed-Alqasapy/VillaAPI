@@ -1,3 +1,6 @@
+using VillaWeb.Services;
+using VillaWeb.Services.IServices;
+
 namespace VillaWeb
 {
     public class Program
@@ -8,6 +11,7 @@ namespace VillaWeb
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            //builder.Services.AddScoped<IVillaService, VillaService>();
 
             var app = builder.Build();
 

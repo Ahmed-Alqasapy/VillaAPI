@@ -1,4 +1,6 @@
-﻿namespace VillaApi.Models
+﻿using Microsoft.AspNetCore.Http;
+
+namespace VillaApi.Models
 {
     public class ApiResponse<TData>
     {

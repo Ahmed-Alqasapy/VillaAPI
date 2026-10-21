@@ -105,7 +105,7 @@ namespace VillaApi.Services
 
          public string GenerateJwtToken(User user)
         {
-            var key =Encoding.ASCII.GetBytes( _config.GetSection("JwtSettings")["Secret_Key"]);
+            var key =Encoding.UTF8.GetBytes( _config.GetSection("JwtSettings")["Secret_Key"]);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

@@ -25,7 +25,6 @@ namespace VillaApi.Controllers
         }
 
         [HttpGet]
-        [Route("/Villas")]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTo>>),StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
         public async Task <ActionResult<ApiResponse<IEnumerable<VillaDTo>>>> Get_Villas()
