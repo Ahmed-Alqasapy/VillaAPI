@@ -125,8 +125,8 @@ namespace VillaApi.Controllers
             catch (Exception ex)
             {
 
-                var errorResponse = ApiResponse<object>.Error(500, "An error occured while created  a villa", ex.Message).ToActionResult();
-                return StatusCode(500,errorResponse);
+                return ApiResponse<object>.Error(500, "An error occured while created  a villa", ex.Message).ToActionResult();
+                
             }
 
         }

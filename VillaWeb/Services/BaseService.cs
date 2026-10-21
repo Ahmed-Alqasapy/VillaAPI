@@ -20,8 +20,8 @@ namespace VillaWeb.Services
         {
             _http = httpClient;
             this.ResponseModel = new();
-
         }
+
         public async Task<T?> SendRequestAsync<T>(ApiRequest apiRequest)
         {
             try
@@ -38,8 +38,6 @@ namespace VillaWeb.Services
 
                      message.Content = JsonContent.Create(apiRequest.Data,options: jsonOptions);
                 }
-
-                
 
                 var response = await client.SendAsync(message);
 
