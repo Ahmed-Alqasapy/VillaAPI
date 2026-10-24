@@ -66,8 +66,9 @@ namespace VillaApi
 
 
 
-            );    
-                ;
+            );
+
+            builder.Services.AddCors();
 
 
 
@@ -236,7 +237,7 @@ namespace VillaApi
                 //Configure the scalar api instead of swagger.
                 app.MapScalarApiReference();
             }
-
+            app.UseCors(c=>c.AllowAnyOrigin().AllowAnyMethod().WithExposedHeaders("*"));
             app.UseHttpsRedirection();
             app.UseRouting();
 

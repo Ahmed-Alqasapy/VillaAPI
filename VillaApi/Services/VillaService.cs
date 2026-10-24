@@ -34,7 +34,7 @@ namespace VillaApi.Services
         {
             var dublicateVilla =await _villaRepo.FindVillaByName(name);
 
-            return dublicateVilla == null;
+            return dublicateVilla == null ? false : true;
         }
 
         public async Task<Villa> GetVillaById(int id)

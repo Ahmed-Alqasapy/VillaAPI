@@ -106,7 +106,7 @@ namespace VillaApi.Controllers
                     return ApiResponse<VillaDTo>.Conflict("There is Conflict", $"A villa with '{VillaDto.Name}' already exists").ToActionResult();
                 }
 
-                var villa = _villaService.SaveVilla(VillaDto);
+                var villa =await _villaService.SaveVilla(VillaDto);
 
                 var responseVillaDto = _map.Map<VillaDTo>(villa);
                 var resposne = ApiResponse<VillaDTo>.Created(responseVillaDto, "Villa created sucessfully ").ToActionResult();

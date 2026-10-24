@@ -7,15 +7,15 @@ namespace VillaWeb.Services
     public class VillaService:  BaseService,IVillaService 
     {
         private readonly IConfiguration _config;
-        private readonly string VillaServiceUrlAPi;
 
         private readonly string villaApiUrl = "/api/Villa";
+
 
 
         public VillaService(IHttpClientFactory httpClient , IConfiguration configuration) : base(httpClient) 
         {
             _config = configuration;
-            VillaServiceUrlAPi = _config.GetValue<string>("ServiceUrl:VillaApi");
+            
 
         }
 
@@ -27,7 +27,7 @@ namespace VillaWeb.Services
             {
                 ApiType = SD.ApiType.POST,
                 Data = villaCreateDTO,
-                ApiUrl = $"{VillaServiceUrlAPi}{villaApiUrl}",
+                ApiUrl = $"{villaApiUrl}",
                 Token = token
             });
 
@@ -38,7 +38,7 @@ namespace VillaWeb.Services
             return SendRequestAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.DELETE,
-                ApiUrl = $"{VillaServiceUrlAPi}{villaApiUrl}/{id}",
+                ApiUrl = $"{villaApiUrl}/{id}",
                 Token = token
             });
         }
@@ -48,18 +48,19 @@ namespace VillaWeb.Services
             return SendRequestAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.GET,
-                ApiUrl = $"{VillaServiceUrlAPi}{villaApiUrl}",
+                ApiUrl = $"{villaApiUrl}",
                 Token = token
             });
 
         }
 
-        public Task<T?> GetAsync<T>(int id, string token)
+        public async Task<T?> GetAsync<T>(int id, string token)
         {
-            return SendRequestAsync<T>(new ApiRequest
+          
+            return await SendRequestAsync<T>(new ApiRequest
             {
                 ApiType = SD.ApiType.GET,
-                ApiUrl = $"{VillaServiceUrlAPi}{villaApiUrl}/{id}",
+                ApiUrl = $"{villaApiUrl}/{id}",
                 Token = token
             });
 
@@ -71,7 +72,7 @@ namespace VillaWeb.Services
             {
                 ApiType = SD.ApiType.PUT,
                 Data = villaUpdateDTO,
-                ApiUrl = $"{VillaServiceUrlAPi}{villaApiUrl}/{villaUpdateDTO.Id}",
+                ApiUrl = $"{villaApiUrl}/{villaUpdateDTO.Id}",
                 Token = token
             });
 
