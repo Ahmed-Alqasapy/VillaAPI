@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Antiforgery;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace VillaApi.Controllers
 {
     [Route("api/[controller]")]
+    [ApiVersionNeutral]
     [ApiController]
 
     public class AntiforgeryController : ControllerBase

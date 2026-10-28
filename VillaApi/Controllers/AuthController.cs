@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using VillaApi.Data;
@@ -10,6 +11,7 @@ using VillaApi.Services;
 namespace VillaApi.Controllers
 {
     [Route("api/[controller]")]
+    [ApiVersionNeutral]
     [ApiController]
     public class AuthController : ControllerBase
     {

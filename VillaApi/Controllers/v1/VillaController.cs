@@ -9,10 +9,12 @@ using VillaApi.Helper;
 using RoyalVilla.DTO;
 using VillaApi.Models.DTOs.AuthDTOs;
 using VillaApi.Services;
+using Asp.Versioning;
 
-namespace VillaApi.Controllers
+namespace VillaApi.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("1.0")]
     [ApiController]
     public class VillaController : ControllerBase
     {

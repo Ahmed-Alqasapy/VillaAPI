@@ -1,15 +1,18 @@
-﻿using AutoMapper;
+﻿using Asp.Versioning;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RoyalVilla.DTO;
+using System.Drawing;
 using VillaApi.Data;
 using VillaApi.Models;
 using VillaApi.Models.DTOs.AuthDTOs;
 
-namespace VillaApi.Controllers
+namespace VillaApi.Controllers.v2
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
+    [ApiVersion("2.0")]
     [ApiController]
     public class VillaAmenityController : ControllerBase
     {
