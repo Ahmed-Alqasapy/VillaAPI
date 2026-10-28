@@ -5,7 +5,7 @@ namespace VillaApi.Services
 {
     public interface IVillaService
     {
-        public  Task<IEnumerable<VillaDTo>> GetAllVillas();
+        public  Task<ApiPagedResult<VillaDTo>> GetAllVillas(VillaQueryParams villaQueryParams);
 
         public Task<Villa> GetVillaById(int id);
 

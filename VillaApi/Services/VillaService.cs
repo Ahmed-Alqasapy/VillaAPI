@@ -20,11 +20,17 @@ namespace VillaApi.Services
             
         }
 
-        public async Task<IEnumerable<VillaDTo>> GetAllVillas()
+        public async Task<ApiPagedResult<VillaDTo>> GetAllVillas(VillaQueryParams q)
         {
-            var villas = await _villaRepo.FindVillas();
 
-            var responseVillaDto = _map.Map<List<VillaDTo>>(villas);
+
+            var villas = await _villaRepo.FindVillas(q);
+
+
+
+            var responseVillaDto = _map.Map<ApiPagedResult<VillaDTo>>(villas);
+
+            //var response = new ApiPagedResult<VillaDTo> { Page = q.Page , Items = responseVillaDto , PageSize = q.PageSize , TotalItems = villas.Count };
 
             return responseVillaDto;
 

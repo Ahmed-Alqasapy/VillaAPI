@@ -151,6 +151,7 @@ namespace VillaApi
                 o.CreateMap<Villa, VillaCreateDTO>().ReverseMap();
                 o.CreateMap<Villa, VillaUpdateDTO>().ReverseMap();
                 o.CreateMap<Villa, VillaDTo>().ReverseMap();
+                o.CreateMap<ApiPagedResult<Villa>, ApiPagedResult<VillaDTo>>().ReverseMap();
                 o.CreateMap<VillaUpdateDTO, VillaDTo>().ReverseMap();
                 o.CreateMap<User, UserDTO>().ReverseMap();
                 o.CreateMap<VillaAmenityCreateDTo, VillaAmenities>()
