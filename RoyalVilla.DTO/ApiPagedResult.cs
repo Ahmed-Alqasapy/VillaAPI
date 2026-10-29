@@ -11,11 +11,21 @@ namespace RoyalVilla.DTO
     {
         public IEnumerable<T> Items { get; set; } = [];
 
+        //Those For Pagination
         public int Page {  get; set; }
 
         public int PageSize { get; set; }
 
+
         public int TotalItems {  get; set; }
+
+        public bool IsFirst => Page <= 1;
+
+        public bool IsLast => Page>=TotalPages;
+
+        public bool HasNext  => Page < TotalPages;
+
+        public bool HasPrevious => Page > 1;
 
         public int TotalPages => (int)Math.Ceiling(TotalItems / (double)PageSize);
 

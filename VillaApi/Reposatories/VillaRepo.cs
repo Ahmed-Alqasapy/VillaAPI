@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RoyalVilla.DTO;
+using System.Linq.Expressions;
 using VillaApi.Data;
 using VillaApi.Models;
 
@@ -12,42 +13,55 @@ namespace VillaApi.Reposatories
 
             var page = q.Page;
 
-            var pageSize = q.PageSize;
-
-            //var villas = await _db.Villas.OrderBy(x => x.Id).ToListAsync();
+            var pageSize = Math.Clamp(q.PageSize, 1, 100);
 
             IQueryable<Villa> query = _db.Villas.AsNoTracking();
 
-
             #region FILER LATER BETTER APPROACH
-            ////Filter
-            //if (query is not null )
-            //{
-            //     query = _db.Villas.Where(v=>v.Occupancy == q.Ocuuoancy)
-            //} 
+
+            //APlly Filtering 
+            if (q.MinRate is not null) query = query.Where(v => v.Rate >= q.MinRate);
+            if (q.MaxRate is not null) query = query.Where(v => v.Rate <= q.MaxRate);
+            if (q.Occupancy is not null) query =query.Where(v => v.Occupancy >= q.Occupancy);
+            //Search by name
+            if (q.Search is not null) query = query.Where(v => v.Name.Contains(q.Search));
+
+ 
             #endregion
 
             //Sorting  and paginatiing
+            //Fix Count To Count Async
+            var total = await query!.CountAsync();
 
-            var total = query.Count();
+            //Sorting  With new Switch Approach
+            Expression<Func<Villa, object>> KeyValueSort = q.SortBy switch
+            {
+                "rate" => V => V.Rate,
+                "name" => V => V.Name,
+                "occupancy" => V => V.Occupancy,
+                "created" => V => V.CreatedDate,
+                _ => V=>V.Id
+            };
+            //it is like e = v=>v.rate;
 
-            var items = await query.OrderByDescending(v => v.Rate).ThenByDescending(v => v.Id)
+            bool desc = String.Equals(q.SortDir, "desc", StringComparison.OrdinalIgnoreCase);
+
+            query = desc
+                ? query.OrderByDescending(keySelector: KeyValueSort).ThenByDescending(v => v.Id) 
+                :query.OrderBy(keySelector: KeyValueSort).ThenBy(v => v.Id);
+
+    
+            var items = await query
                 .Skip((page-1)*pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-
+         
+            
 
                
             return new ApiPagedResult<Villa> { Page= page , PageSize = pageSize , TotalItems = total , Items = items };
 
-            //return items;
-
-
-
-
-
-
-            //return  await _db.Villas.ToListAsync();
+            
         }
 
         public async Task<Villa> FindVillaById(int id)

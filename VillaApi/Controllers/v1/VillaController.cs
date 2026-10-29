@@ -27,8 +27,8 @@ namespace VillaApi.Controllers.v1
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTo>>),StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<ApiPagedResult<VillaDTo>>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<ApiPagedResult< object>>), StatusCodes.Status500InternalServerError)]
         public async Task <ActionResult<ApiResponse<ApiPagedResult<VillaDTo>>>> Get_Villas([FromQuery]VillaQueryParams q)
         {
             
